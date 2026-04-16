@@ -39,6 +39,25 @@
             { name: "Check lock", unfixed: "", fixed: "", count: 0},
 
         ];
+        function startGame(){
+            userFear = document.getElementById('fear-input').value|| "the bad thing";
+            document.getElementById('start-screen') .style.display = "none";
+            gameActive = true
+              initGrid();
+            startPeaceTimer();
+            runCountdown();
+            speakFear();
+        }
+function initGrid();
+const grid = document.getElementById('task-grid');
+            taskData.forEach((data, index) => {
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.id = `card-${index}`;
+                card.innerHTML = `
+                    <img src="${data.unfixed}" id="img-${index}">
+                    <div style="font-weight:bold; font-size: 11px; margin-top:5px;">${data.name}</div>
+                    <div class="counter" id="count-${index}">Done: 0</div>
 
     </script>
 
