@@ -1,0 +1,46 @@
+<html>
+    <head>
+       <style>
+
+       </style> 
+    </head>
+    <body>
+        <div id="start-screen">
+            <h1>What do you fear?</h1>
+             <input type="text" id="fear-input" placeholder="e.g. Someone will get hurt...">
+             <br>
+             <button onclick="startGame()">Begin</button>
+
+        </div>
+
+        <div id="voice-box" >...</div>
+        <div id="timer">00:15</div>
+        <div id="task-grid"></div>
+         <div id="win-screen">
+        <h1>The thoughts were lying.</h1>
+        <p id="win-message"></p>
+        <p>By ignoring the urges for 10 seconds, you proved the bad thing didn't happen.</p>
+        <button onclick="location.reload()">Reset the Cycle</button>
+    </div>
+    <script>
+        let userFear = "";
+        let timeLeft = "15";
+        let peaceTimeout;
+        let gameActive = false;
+        const winDelay = 10000;
+
+
+
+        const taskData = [
+            { name: "Wash Hands", unfixed: "", fixed: "", count: 0},
+            { name: "Straighten Picture", unfixed: "", fixed: "", count: 0},
+            { name: "Flick switch", unfixed: "", fixed: "", count: 0},
+            { name: "Touch plushie", unfixed: "", fixed: "", count: 0},
+            { name: "Check lock", unfixed: "", fixed: "", count: 0},
+
+        ];
+
+    </script>
+
+    </body>
+</html>
