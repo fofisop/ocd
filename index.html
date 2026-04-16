@@ -24,7 +24,7 @@
     </div>
     <script>
         let userFear = "";
-        let timeLeft = "15";
+        let timeLeft = 15;
         let peaceTimeout;
         let gameActive = false;
         const winDelay = 10000;
@@ -42,13 +42,13 @@
         function startGame(){
             userFear = document.getElementById('fear-input').value|| "the bad thing";
             document.getElementById('start-screen') .style.display = "none";
-            gameActive = true
+            gameActive = true;
               initGrid();
             startPeaceTimer();
             runCountdown();
             speakFear();
         }
-function initGrid();
+function initGrid(){
 const grid = document.getElementById('task-grid');
             taskData.forEach((data, index) => {
                 const card = document.createElement('div');
@@ -58,6 +58,60 @@ const grid = document.getElementById('task-grid');
                     <img src="${data.unfixed}" id="img-${index}">
                     <div style="font-weight:bold; font-size: 11px; margin-top:5px;">${data.name}</div>
                     <div class="counter" id="count-${index}">Done: 0</div>
+                    `;
+                      card.onclick = () => performCompulsion(index);
+                grid.appendChild(card);
+            });
+        }
+    function performCompulsion(index) {
+      if (!gameActive) return;
+        taskData[index].count++;
+            document.getElementById(`count-${index}`).innerText = `Done: ${taskData[index].count}`;
+            
+            const img = document.getElementById(`img-${index}`);
+            const card = document.getElementById(`card-${index}`);
+            img.src = taskData[index].fixed;
+            card.style.animation = "none";
+            setTimeout(() => {
+                if(gameActive) {
+                    img.src = taskData[index].unfixed;
+                    card.style.animation = "jitter 0.5s infinite";
+                }
+            }, 800);
+            clearTimeout(peaceTimeout);
+            startPeaceTimer();
+            }
+
+        function speakFear() {
+            if(!gameActive) return;
+            const phrases = [
+                `If you don't keep clicking, ${userFear} is your fault.`,
+                `It's not right. It's not safe. ${userFear.toUpperCase()}!`,
+                `Just one more click to stop ${userFear}...`,
+                `You haven't checked enough. Do you WANT ${userFear}?` ];
+               document.getElementById('voice-box').innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            setTimeout(speakFear, 3000);
+        }
+        function runCountdown() {
+            const interval = setInterval(() => {
+                if (!gameActive) { clearInterval(interval); return; }
+                timeLeft--;
+                document.getElementById('timer').innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
+                if (timeLeft <= 0) {
+                    alert(`TIME'S UP. ${userFear.toUpperCase()} IS HAPPENING. DO IT AGAIN.`);
+                    location.reload();
+                }
+            }, 1000);
+        }
+ function startPeaceTimer() {
+            peaceTimeout = setTimeout(() => {
+                if (gameActive) {
+                    gameActive = false;
+                    document.getElementById('win-message').innerText = `You resisted the urges for 10 seconds. \n\n${userFear} did not happen. You are safe.`;
+                    document.getElementById('win-screen').style.display = 'flex';
+                }
+            }, winDelay);
+        }
 
     </script>
 

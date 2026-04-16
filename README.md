@@ -1,1 +1,2 @@
 # ocd
+I have created this for educational purposes. I personally stuggle with OCD, so making a game for it is a bit freeing. I just want people to realize that OCD is more than perfectionism, and it isn't a "trend". I watched a tutorial to learn how to do some of the javascript, and I used ai for five percent of this.
