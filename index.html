@@ -12,8 +12,27 @@
             align-items: center; justify-content: center; text-align: center;
           }
           #task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px; }
-.task-card { width: 140px; height: 160px; padding: 10px; cursor: pointer; text-align: center; }
-.task-card img { width: 80px; height: 80px; display: block; margin: 0 auto;  }
+          .task-card { 
+    width: 100px; 
+    height: 100px; 
+    cursor: pointer; 
+    text-align: center; 
+    border-radius: 50%;    
+    overflow: hidden;      
+    background: #000;     
+    transition: 0.2s;
+}
+
+.task-card img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover;     
+    display: block; 
+}
+
+
+.counter, .task-card div { display: none; }
+
 #timer { font-size: 3rem; margin: 10px; }
 #win-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; color: black; z-index: 300; flex-direction: column; align-items: center; justify-content: center; }
 @keyframes jitter { 0% { transform: translate(0,0); } 50% { transform: translate(1px, -1px); } 100% { transform: translate(0,0); } }
@@ -81,12 +100,19 @@ const grid = document.getElementById('task-grid');
             });
         }
     function performCompulsion(index) {
+        if (index !== currentGoal) {
+    document.getElementById('voice-box').innerText =
+        "WRONG ONE. NOW SOMETHING FEELS OFF.";
+    
+    timeLeft = Math.max(3, timeLeft - 2); 
+    return;
+}
 
       if (!gameActive) return;
       if (index === currentGoal){
-           document.getElementById('voice-box').innerText = "GOOD. NOW THE NEXT ONE.";
-    
+           document.getElementById('voice-box').innerText = "GOOD. NOW ONTO THE NEXT ONE.";
       }
+      
         taskData[index].count++;
             document.getElementById(`count-${index}`).innerText = `Done: ${taskData[index].count}`;
             
@@ -103,8 +129,7 @@ const grid = document.getElementById('task-grid');
             clearTimeout(peaceTimeout);
             startPeaceTimer();
             }
-
-       function speakFear() {
+function speakFear() {
     if(!gameActive) return;
 
     
@@ -115,7 +140,8 @@ const grid = document.getElementById('task-grid');
     const targetName = taskData[currentGoal].name;
 
     
-    document.getElementById(`card-${currentGoal}`).style.borderColor = "white";
+    const targetCard = document.getElementById(`card-${currentGoal}`);
+    if(targetCard) targetCard.style.borderColor = "white";
 
     const phrases = [
         `If you don't ${targetName.toUpperCase()} right now, ${userFear} will happen.`,
@@ -126,15 +152,11 @@ const grid = document.getElementById('task-grid');
     ];
 
     document.getElementById('voice-box').innerText = phrases[Math.floor(Math.random() * phrases.length)];
-
-    setTimeout(speakFear, 3000);
-
-
-
-    document.getElementById('voice-box').innerText = phrases[Math.floor(Math.random() * phrases.length)];
     setTimeout(speakFear, 3000);
 }
 
+
+ 
 
        function runCountdown() {
     const interval = setInterval(() => {
