@@ -1,6 +1,22 @@
 <html>
     <head>
        <style>
+        body {
+           
+             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; overflow: hidden;
+        }
+          #start-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+             z-index: 200; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+          }
+          #task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px; }
+.task-card { width: 140px; height: 160px; padding: 10px; cursor: pointer; text-align: center; }
+.task-card img { width: 80px; height: 80px; display: block; margin: 0 auto;  }
+#timer { font-size: 3rem; margin: 10px; }
+#win-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; color: black; z-index: 300; flex-direction: column; align-items: center; justify-content: center; }
+@keyframes jitter { 0% { transform: translate(0,0); } 50% { transform: translate(1px, -1px); } 100% { transform: translate(0,0); } }
 
        </style> 
     </head>
@@ -23,6 +39,7 @@
         <button onclick="location.reload()">Reset the Cycle</button>
     </div>
     <script>
+        let currentGoal = 0;
         let userFear = "";
         let timeLeft = 15;
         let peaceTimeout;
@@ -32,11 +49,11 @@
 
 
         const taskData = [
-            { name: "Wash Hands", unfixed: "", fixed: "", count: 0},
-            { name: "Straighten Picture", unfixed: "", fixed: "", count: 0},
-            { name: "Flick switch", unfixed: "", fixed: "", count: 0},
-            { name: "Touch plushie", unfixed: "", fixed: "", count: 0},
-            { name: "Check lock", unfixed: "", fixed: "", count: 0},
+            { name: "Wash Hands", unfixed: "faucet.png", fixed: "water.png", count: 0},
+            { name: "Straighten Picture", unfixed: "piccc.png", fixed: "perf.png", count: 0},
+            { name: "Flick switch", unfixed: "off.png", fixed: "on.png", count: 0},
+            { name: "Touch plushie", unfixed: "Ted.png", fixed: "heart.png", count: 0},
+            { name: "Check lock", unfixed: "openlock.png", fixed: "close.png", count: 0},
 
         ];
         function startGame(){
@@ -64,7 +81,12 @@ const grid = document.getElementById('task-grid');
             });
         }
     function performCompulsion(index) {
+
       if (!gameActive) return;
+      if (index === currentGoal){
+           document.getElementById('voice-box').innerText = "GOOD. NOW THE NEXT ONE.";
+    
+      }
         taskData[index].count++;
             document.getElementById(`count-${index}`).innerText = `Done: ${taskData[index].count}`;
             
@@ -82,27 +104,52 @@ const grid = document.getElementById('task-grid');
             startPeaceTimer();
             }
 
-        function speakFear() {
-            if(!gameActive) return;
-            const phrases = [
-                `If you don't keep clicking, ${userFear} is your fault.`,
-                `It's not right. It's not safe. ${userFear.toUpperCase()}!`,
-                `Just one more click to stop ${userFear}...`,
-                `You haven't checked enough. Do you WANT ${userFear}?` ];
-               document.getElementById('voice-box').innerText = phrases[Math.floor(Math.random() * phrases.length)];
-            setTimeout(speakFear, 3000);
+       function speakFear() {
+    if(!gameActive) return;
+
+    
+    document.querySelectorAll('.task-card').forEach(c => c.style.borderColor = "#333");
+
+    
+    currentGoal = Math.floor(Math.random() * taskData.length);
+    const targetName = taskData[currentGoal].name;
+
+    
+    document.getElementById(`card-${currentGoal}`).style.borderColor = "white";
+
+    const phrases = [
+        `If you don't ${targetName.toUpperCase()} right now, ${userFear} will happen.`,
+        `You didn't ${targetName} correctly. Do it again or ${userFear} wins.`,
+        `The ${targetName} is still wrong. Fix it!`,
+        `It's not safe until you ${targetName}. DON'T STOP.`,
+        `Just one more time... ${targetName}... or else ${userFear.toUpperCase()}!`
+    ];
+
+    document.getElementById('voice-box').innerText = phrases[Math.floor(Math.random() * phrases.length)];
+
+    setTimeout(speakFear, 3000);
+
+
+
+    document.getElementById('voice-box').innerText = phrases[Math.floor(Math.random() * phrases.length)];
+    setTimeout(speakFear, 3000);
+}
+
+
+       function runCountdown() {
+    const interval = setInterval(() => {
+        if (!gameActive) { clearInterval(interval); return; }
+        timeLeft--;
+        document.getElementById('timer').innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
+        
+        if (timeLeft <= 0) {
+            gameActive = false;
+            clearInterval(interval);
+            alert("GOOD JOB. Everything is safe now... or is it? You better check again just to be sure.");
+            location.reload(); 
         }
-        function runCountdown() {
-            const interval = setInterval(() => {
-                if (!gameActive) { clearInterval(interval); return; }
-                timeLeft--;
-                document.getElementById('timer').innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
-                if (timeLeft <= 0) {
-                    alert(`TIME'S UP. ${userFear.toUpperCase()} IS HAPPENING. DO IT AGAIN.`);
-                    location.reload();
-                }
-            }, 1000);
-        }
+    }, 1000);
+}
  function startPeaceTimer() {
             peaceTimeout = setTimeout(() => {
                 if (gameActive) {
