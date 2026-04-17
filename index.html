@@ -58,6 +58,16 @@
         <button onclick="location.reload()">Reset the Cycle</button>
     </div>
     <script>
+        function endGame(title, message) {
+    gameActive = false;
+    clearTimeout(peaceTimeout);
+
+    document.querySelector('#win-screen h1').innerText = title;
+    document.getElementById('win-message').innerText = message;
+    document.getElementById('win-screen').style.display = 'flex';
+}
+        let totalActions = 0;
+const WIN_TARGET = 10;
         let currentGoal = 0;
         let userFear = "";
         let timeLeft = 15;
@@ -100,35 +110,53 @@ const grid = document.getElementById('task-grid');
             });
         }
     function performCompulsion(index) {
-        if (index !== currentGoal) {
-    document.getElementById('voice-box').innerText =
-        "WRONG ONE. NOW SOMETHING FEELS OFF.";
-    
-    timeLeft = Math.max(3, timeLeft - 2); 
-    return;
-}
+    if (!gameActive) return;
 
-      if (!gameActive) return;
-      if (index === currentGoal){
-           document.getElementById('voice-box').innerText = "GOOD. NOW ONTO THE NEXT ONE.";
-      }
-      
-        taskData[index].count++;
-            document.getElementById(`count-${index}`).innerText = `Done: ${taskData[index].count}`;
-            
-            const img = document.getElementById(`img-${index}`);
-            const card = document.getElementById(`card-${index}`);
-            img.src = taskData[index].fixed;
-            card.style.animation = "none";
-            setTimeout(() => {
-                if(gameActive) {
-                    img.src = taskData[index].unfixed;
-                    card.style.animation = "jitter 0.5s infinite";
-                }
-            }, 800);
-            clearTimeout(peaceTimeout);
-            startPeaceTimer();
-            }
+
+    if (index !== currentGoal) {
+        document.getElementById('voice-box').innerText =
+            "WRONG ONE. NOW SOMETHING FEELS OFF.";
+
+        timeLeft = Math.max(3, timeLeft - 2);
+        return;
+    }
+
+
+    document.getElementById('voice-box').innerText =
+        "GOOD. NOW ONTO THE NEXT ONE.";
+
+    totalActions++;
+    taskData[index].count++;
+
+
+    if (totalActions >= WIN_TARGET) {
+        endGame(
+    "You fed the loop.",
+    `You kept performing the rituals.\n\nBut the relief never lasted.\n\n${userFear} still feels like it could happen.`
+);
+return;
+
+    
+    document.getElementById(`count-${index}`).innerText =
+        `Done: ${taskData[index].count}`;
+
+    const img = document.getElementById(`img-${index}`);
+    const card = document.getElementById(`card-${index}`);
+
+    img.src = taskData[index].fixed;
+    card.style.animation = "none";
+
+    setTimeout(() => {
+        if (gameActive) {
+            img.src = taskData[index].unfixed;
+            card.style.animation = "jitter 0.5s infinite";
+        }
+    }, 800);
+
+    clearTimeout(peaceTimeout);
+    startPeaceTimer();
+}
+          
 function speakFear() {
     if(!gameActive) return;
 
@@ -165,11 +193,14 @@ function speakFear() {
         document.getElementById('timer').innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
         
         if (timeLeft <= 0) {
-            gameActive = false;
-            clearInterval(interval);
-            alert("GOOD JOB. Everything is safe now... or is it? You better check again just to be sure.");
-            location.reload(); 
-        }
+    gameActive = false;
+    clearInterval(interval);
+
+    document.getElementById('win-message').innerText =
+        `Time ran out.\n\nYou didn't do enough to feel safe.\n\n${userFear} still lingers.`;
+
+    document.getElementById('win-screen').style.display = 'flex';
+}
     }, 1000);
 }
  function startPeaceTimer() {
