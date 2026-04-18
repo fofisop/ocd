@@ -1,10 +1,25 @@
 <html>
     <head>
        <style>
+        body.heartbeat {
+    animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
+        body.shake {
+    animation: jitter 0.2s infinite;
+}
         body {
            
              display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; overflow: hidden;
+            background: white;
+            color: black;
+            transition: background 10s linear, color 10s linear;
         }
           #start-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -13,34 +28,54 @@
           }
           #task-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 20px; }
           .task-card { 
-    width: 100px; 
-    height: 100px; 
+    width: 140px; 
+    height: 140px; 
     cursor: pointer; 
     text-align: center; 
     border-radius: 50%;    
     overflow: hidden;      
-    background: #000;     
+    background: transparent;     
     transition: 0.2s;
 }
 
 .task-card img { 
-    width: 100%; 
-    height: 100%; 
+    width: 100%;
+    height: 100%;
     object-fit: cover;     
     display: block; 
+    center;
+    tra
+
 }
 
 
 .counter, .task-card div { display: none; }
 
-#timer { font-size: 3rem; margin: 10px; }
+#timer { font-size: 3rem; margin: 10px; display: none; }
 #win-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; color: black; z-index: 300; flex-direction: column; align-items: center; justify-content: center; }
 @keyframes jitter { 0% { transform: translate(0,0); } 50% { transform: translate(1px, -1px); } 100% { transform: translate(0,0); } }
+.dark-mode {
+    background: black;
+    color: red;
+    transition: background 20s linear, color 20s linear;
+}
+
+
 
        </style> 
     </head>
     <body>
         <div id="start-screen">
+            <h1>What is OCD?</h1>
+            <p>OCD is a mental state where a person has repeated, obsessive thoughts that create anxiety. 
+                To try to feel better, they may feel forced to do certain actions or rituals
+(called compulsions), like checking, washing, or repeating things.
+            </p>
+            <p>But to really understand it, you need to imagine a thought that won't leave you alone.
+                It tells you something bad will happen if you don't do what it says. Even if you know it doesn’t make sense, it still feels real.
+And the only way to quiet it is to obey it... Or is it?
+            </p>
+             <p> This  game simulates how OCD feels for some people. It starts with a simple question:</p>
             <h1>What do you fear?</h1>
              <input type="text" id="fear-input" placeholder="e.g. Someone will get hurt...">
              <br>
@@ -49,28 +84,29 @@
         </div>
 
         <div id="voice-box" >...</div>
-        <div id="timer">00:15</div>
+        <div id="timer">00:20</div>
         <div id="task-grid"></div>
          <div id="win-screen">
         <h1>The thoughts were lying.</h1>
         <p id="win-message"></p>
-        <p>By ignoring the urges for 10 seconds, you proved the bad thing didn't happen.</p>
+    
         <button onclick="location.reload()">Reset the Cycle</button>
     </div>
     <script>
+
         function endGame(title, message) {
     gameActive = false;
     clearTimeout(peaceTimeout);
-
+    document.body.classList.add("heartbeat");
     document.querySelector('#win-screen h1').innerText = title;
     document.getElementById('win-message').innerText = message;
     document.getElementById('win-screen').style.display = 'flex';
 }
         let totalActions = 0;
-const WIN_TARGET = 10;
+const WIN_TARGET = 5;
         let currentGoal = 0;
         let userFear = "";
-        let timeLeft = 15;
+        let timeLeft = 20;
         let peaceTimeout;
         let gameActive = false;
         const winDelay = 10000;
@@ -78,14 +114,16 @@ const WIN_TARGET = 10;
 
 
         const taskData = [
-            { name: "Wash Hands", unfixed: "faucet.png", fixed: "water.png", count: 0},
-            { name: "Straighten Picture", unfixed: "piccc.png", fixed: "perf.png", count: 0},
-            { name: "Flick switch", unfixed: "off.png", fixed: "on.png", count: 0},
-            { name: "Touch plushie", unfixed: "Ted.png", fixed: "heart.png", count: 0},
-            { name: "Check lock", unfixed: "openlock.png", fixed: "close.png", count: 0},
+            { name: "Wash Hands", unfixed: "faucet.png", fixed: "water .png", count: 0},
+            { name: "Straighten Picture", unfixed: "piccc .png", size: "100%", fixed: "perf .png", count: 0},
+            { name: "Flick switch", unfixed: "off .png", fixed: "on .png", count: 0},
+            { name: "Touch plushie", unfixed: "Ted .png", fixed: "heart .png", count: 0},
+            { name: "Check lock", unfixed: "openlock .png", fixed: "close .png", count: 0},
 
         ];
         function startGame(){
+            document.body.classList.add("dark-mode");
+            document.getElementById('timer').style.display = "block";
             userFear = document.getElementById('fear-input').value|| "the bad thing";
             document.getElementById('start-screen') .style.display = "none";
             gameActive = true;
@@ -105,6 +143,13 @@ const grid = document.getElementById('task-grid');
                     <div style="font-weight:bold; font-size: 11px; margin-top:5px;">${data.name}</div>
                     <div class="counter" id="count-${index}">Done: 0</div>
                     `;
+                    const img = card.querySelector("img");
+
+
+if (data.size) {
+    img.style.width = data.size;
+    img.style.height = data.size;
+}
                       card.onclick = () => performCompulsion(index);
                 grid.appendChild(card);
             });
@@ -118,7 +163,12 @@ const grid = document.getElementById('task-grid');
             "WRONG ONE. NOW SOMETHING FEELS OFF.";
 
         timeLeft = Math.max(3, timeLeft - 2);
+          document.body.classList.add("shake");
+setTimeout(() => {
+    document.body.classList.remove("shake");
+}, 300)
         return;
+      ;
     }
 
 
@@ -135,6 +185,7 @@ const grid = document.getElementById('task-grid');
     `You kept performing the rituals.\n\nBut the relief never lasted.\n\n${userFear} still feels like it could happen.`
 );
 return;
+    }
 
     
     document.getElementById(`count-${index}`).innerText =
@@ -153,8 +204,10 @@ return;
         }
     }, 800);
 
+    if (index === currentGoal) {
     clearTimeout(peaceTimeout);
     startPeaceTimer();
+}
 }
           
 function speakFear() {
@@ -191,25 +244,26 @@ function speakFear() {
         if (!gameActive) { clearInterval(interval); return; }
         timeLeft--;
         document.getElementById('timer').innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
-        
+        if (timeLeft % 5 === 0) {
+    document.getElementById('voice-box').innerText =
+        "Why are you hesitating?";
+}
         if (timeLeft <= 0) {
-    gameActive = false;
     clearInterval(interval);
 
-    document.getElementById('win-message').innerText =
-        `Time ran out.\n\nYou didn't do enough to feel safe.\n\n${userFear} still lingers.`;
-
-    document.getElementById('win-screen').style.display = 'flex';
-}
+endGame(
+    "It never felt finished.",
+    `Time ran out.\n\nYou didn't do enough to feel safe.\n\n${userFear} still lingers.`
+);}
     }, 1000);
 }
  function startPeaceTimer() {
             peaceTimeout = setTimeout(() => {
                 if (gameActive) {
-                    gameActive = false;
-                    document.getElementById('win-message').innerText = `You resisted the urges for 10 seconds. \n\n${userFear} did not happen. You are safe.`;
-                    document.getElementById('win-screen').style.display = 'flex';
-                }
+                   endGame(
+    "The thoughts were lying.",
+    `You resisted the urges for 10 seconds.\n\n${userFear} did not happen. You are safe. By ignoring the urges for 10 seconds, you proved the bad thing didn't happen.`
+);}
             }, winDelay);
         }
 
