@@ -1,8 +1,39 @@
-<html>
+<html> 
+
     <head>
        <style>
+        #win-screen {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+#win-screen.show {
+    opacity: 1;
+}
+        .bad-ending {
+    background: black;
+    color: red;
+}
+.bad-ending #win-screen {
+    background: black;
+    color: red;
+}
+
+.good-ending #win-screen {
+    background: white;
+    color: black;
+}
+.good-ending {
+    background: white;
+    color: black;
+}
         body.heartbeat {
     animation: pulse 0.5s infinite;
+}
+.task-card:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
 }
 
 @keyframes pulse {
@@ -52,7 +83,7 @@
 .counter, .task-card div { display: none; }
 
 #timer { font-size: 3rem; margin: 10px; display: none; }
-#win-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; color: black; z-index: 300; flex-direction: column; align-items: center; justify-content: center; }
+#win-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; color: inherit; z-index: 300; flex-direction: column; align-items: center; justify-content: center; }
 @keyframes jitter { 0% { transform: translate(0,0); } 50% { transform: translate(1px, -1px); } 100% { transform: translate(0,0); } }
 .dark-mode {
     background: black;
@@ -94,13 +125,22 @@ And the only way to quiet it is to obey it... Or is it?
     </div>
     <script>
 
-        function endGame(title, message) {
+     function endGame(title, message, isGood) {
     gameActive = false;
-    clearTimeout(peaceTimeout);
-    document.body.classList.add("heartbeat");
+    clearTimeout(peaceTimeout); //testing
+    const body = document.body;
+    body.classList.remove("dark-mode", "shake", "heartbeat", "bad-ending", "good-ending");
+
+    if (isGood) {
+        body.classList.add("good-ending");
+    } else {
+        body.classList.add("bad-ending");
+    }
     document.querySelector('#win-screen h1').innerText = title;
     document.getElementById('win-message').innerText = message;
-    document.getElementById('win-screen').style.display = 'flex';
+    const win = document.getElementById('win-screen');
+win.style.display = 'flex';
+setTimeout(() => win.classList.add("show"), 50);
 }
         let totalActions = 0;
 const WIN_TARGET = 5;
@@ -114,11 +154,11 @@ const WIN_TARGET = 5;
 
 
         const taskData = [
-            { name: "Wash Hands", unfixed: "faucet.png", fixed: "water .png", count: 0},
-            { name: "Straighten Picture", unfixed: "piccc .png", size: "100%", fixed: "perf .png", count: 0},
-            { name: "Flick switch", unfixed: "off .png", fixed: "on .png", count: 0},
-            { name: "Touch plushie", unfixed: "Ted .png", fixed: "heart .png", count: 0},
-            { name: "Check lock", unfixed: "openlock .png", fixed: "close .png", count: 0},
+            { name: "wash your hands", unfixed: "faucet.png", fixed: "water .png", count: 0},
+            { name: "straighten the picture", unfixed: "piccc .png", size: "100%", fixed: "perf .png", count: 0},
+            { name: "flick the switch", unfixed: "off .png", fixed: "on .png", count: 0},
+            { name: "touch the plushie", unfixed: "Ted .png", fixed: "heart .png", count: 0},
+            { name: "check the lock", unfixed: "openlock .png", fixed: "close .png", count: 0},
 
         ];
         function startGame(){
@@ -131,6 +171,7 @@ const WIN_TARGET = 5;
             startPeaceTimer();
             runCountdown();
             speakFear();
+            setTimeout(() => (popup.style.display='block', setTimeout(()=>popup.style.display='none',3000)),10000);
         }
 function initGrid(){
 const grid = document.getElementById('task-grid');
@@ -182,7 +223,8 @@ setTimeout(() => {
     if (totalActions >= WIN_TARGET) {
         endGame(
     "You fed the loop.",
-    `You kept performing the rituals.\n\nBut the relief never lasted.\n\n${userFear} still feels like it could happen.`
+    `You kept performing the rituals.\n\nBut the relief never lasted.\n\n${userFear} still feels like it could happen.`,
+    false
 );
 return;
     }
@@ -227,7 +269,7 @@ function speakFear() {
     const phrases = [
         `If you don't ${targetName.toUpperCase()} right now, ${userFear} will happen.`,
         `You didn't ${targetName} correctly. Do it again or ${userFear} wins.`,
-        `The ${targetName} is still wrong. Fix it!`,
+        `${targetName} or else...`,
         `It's not safe until you ${targetName}. DON'T STOP.`,
         `Just one more time... ${targetName}... or else ${userFear.toUpperCase()}!`
     ];
@@ -254,6 +296,7 @@ function speakFear() {
 endGame(
     "It never felt finished.",
     `Time ran out.\n\nYou didn't do enough to feel safe.\n\n${userFear} still lingers.`
+    ,false
 );}
     }, 1000);
 }
@@ -262,12 +305,14 @@ endGame(
                 if (gameActive) {
                    endGame(
     "The thoughts were lying.",
-    `You resisted the urges for 10 seconds.\n\n${userFear} did not happen. You are safe. By ignoring the urges for 10 seconds, you proved the bad thing didn't happen.`
+    `You resisted the urges for 10 seconds.\n\n${userFear} did not happen. You are safe. By ignoring the urges for 10 seconds, you proved the bad thing didn't happen.`,
+    true 
 );}
             }, winDelay);
         }
 
     </script>
+<div id="popup" style="display:none; position:fixed; bottom:10px; color:whitesmoke;">You don't have to listen to the voices</div>
 
     </body>
 </html>
